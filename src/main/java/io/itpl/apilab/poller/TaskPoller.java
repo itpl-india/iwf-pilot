@@ -38,7 +38,7 @@ public class TaskPoller implements Runnable{
     }
     @Override
     public void run() {
-        logger.info("[{}] Task Broker Started with {} Concurrency Level",this.driverId,workerThreadPoolSize);
+        logger.info("[{}] Task Poller Started with {} Concurrency Level",this.driverId,workerThreadPoolSize);
         if(!ready){
             logger.error("[{}] Task Broker is Not Ready!",this.driverId);
             return;

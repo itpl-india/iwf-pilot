@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 @Service
 public class DefaultPacketReceiver implements PacketReceiver {
-    private static final int MAX_SIMULATED_RESPONSE_TIME_MILLIS = 250;
+    private static final int MAX_SIMULATED_RESPONSE_TIME_MILLIS = 350;
     private static final Logger logger = LoggerFactory.getLogger(DefaultPacketReceiver.class);
     private LongAdder counter = new LongAdder();
     @Override

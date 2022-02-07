@@ -7,10 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
@@ -55,8 +53,12 @@ public class UdpDeviceListener implements DeviceListener {
     }
 
     @Override
-    public void shutdown(String id) {
+    public void shutdown(String id) throws IOException {
         this.stopped.set(true);
+        InetAddress address = InetAddress.getByName("localhost");
+        byte[] cmd = "BYE".getBytes(StandardCharsets.UTF_8);
+        DatagramPacket terminator = new DatagramPacket(cmd,cmd.length,address,port);
+        udpSocket.send(terminator);
         if(listenerThread!=null){
             listenerThread.interrupt();
 
@@ -91,6 +93,9 @@ public class UdpDeviceListener implements DeviceListener {
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
             try {
                 udpSocket.receive(packet);
+                if(isShutdownPacket(buffer)){
+                    break;
+                }
                 handler.accept(buffer, InetAddress.getLocalHost().getHostAddress(), this.port);
                 counter.increment();
                 logger.info("[{}] Packets Received on [localhost:{}]",counter.longValue(),this.port);
@@ -102,5 +107,11 @@ public class UdpDeviceListener implements DeviceListener {
         udpSocket.close();
         logger.info("[{}] UDP Listener Stopped!",this.port);
 
+    }
+    private boolean isShutdownPacket(byte[] chunk){
+        if(chunk==null) return false;
+        if(chunk.length<3) return false;
+        String cmd = new String(chunk,0,1);
+        return cmd.equals("BYE");
     }
 }
