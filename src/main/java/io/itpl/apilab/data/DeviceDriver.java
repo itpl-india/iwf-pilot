@@ -4,6 +4,15 @@ public class DeviceDriver {
     private String protocol;
     private String id;
     private int port;
+    private int concurrency;
+
+    public int getConcurrency() {
+        return concurrency;
+    }
+
+    public void setConcurrency(int concurrency) {
+        this.concurrency = concurrency;
+    }
 
     public String getProtocol() {
         return protocol;

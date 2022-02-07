@@ -3,6 +3,7 @@ package io.itpl.apilab.accepter;
 import io.itpl.apilab.data.Packet;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Queue;
 
 public interface PacketAccepter {
@@ -13,4 +14,9 @@ public interface PacketAccepter {
     public void start();
     public void stop();
     public Queue<Packet> getTaskPool();
+    public Date startedSince();
+    public long received();
+    public long errors();
+    public long scheduled();
+    public long currentQueue();
 }

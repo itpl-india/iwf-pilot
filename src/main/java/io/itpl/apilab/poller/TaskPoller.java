@@ -1,7 +1,7 @@
-package io.itpl.apilab.broker;
+package io.itpl.apilab.poller;
 
 import io.itpl.apilab.data.Packet;
-import io.itpl.apilab.services.PacketCollector;
+import io.itpl.apilab.receiver.PacketReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,48 +12,57 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.LongAdder;
 
 
-public class TaskBroker implements Runnable{
+public class TaskPoller implements Runnable{
     private String driverId;
     private Queue<Packet> taskPool;
     private int workerThreadPoolSize;
     private ExecutorService workerThreadPool;
-    private PacketCollector collector;
+    private PacketReceiver collector;
     private boolean ready;
     private boolean stopped;
-    private static final Logger logger = LoggerFactory.getLogger(TaskBroker.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaskPoller.class);
     private LongAdder counter = new LongAdder();
-    private TaskBroker(){}
-    public static TaskBroker getInstance(int poolSize,Queue<Packet> taskPool,String driverId){
+    private TaskPoller(){}
+    public static TaskPoller getInstance(int poolSize, Queue<Packet> taskPool, String driverId){
         logger.info("[{}] Creating Task Broker",driverId);
-        TaskBroker broker = new TaskBroker();
+        TaskPoller broker = new TaskPoller();
         broker.taskPool = taskPool;
         broker.workerThreadPoolSize = poolSize;
         broker.driverId = driverId;
         return broker;
     }
-    public void build(PacketCollector collector){
+    public void build(PacketReceiver collector){
         workerThreadPool = Executors.newFixedThreadPool(workerThreadPoolSize);
         this.collector = collector;
         this.ready = true;
     }
     @Override
     public void run() {
-        logger.info("[{}] Task Broker Started",this.driverId);
+        logger.info("[{}] Task Broker Started with {} Concurrency Level",this.driverId,workerThreadPoolSize);
         if(!ready){
             logger.error("[{}] Task Broker is Not Ready!",this.driverId);
             return;
         }
         while (!stopped){
-            if(!taskPool.isEmpty()){
+            if(!Thread.currentThread().isInterrupted()) {
+                if (taskPool.isEmpty()) {
+                    continue;
+                }
+                Packet next = taskPool.poll();
                 counter.increment();
-                logger.trace("[{}] [{}] Scheduling new Task",driverId,counter.longValue());
-                PacketCollectionTask task = new PacketCollectionTask(taskPool.poll(),collector);
+                logger.trace("[{}] Polling success, Scheduling Task#{}", driverId, counter.longValue());
+                PacketReceiverTask task = new PacketReceiverTask(next, collector);
                 workerThreadPool.submit(task);
+            }else{
+                break;
             }
+
         }
+        logger.info("Packet Poller shutdown finished!");
     }
     public void stop(){
         this.stopped = true;
+        logger.info("[{}] Packet Poller stopped.",driverId);
     }
 
     public String getDriverId() {

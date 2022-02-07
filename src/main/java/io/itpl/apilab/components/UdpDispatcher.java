@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.concurrent.atomic.LongAdder;
 
 public class UdpDispatcher {
     private DatagramSocket socket = new DatagramSocket();
     private static final Logger logger = LoggerFactory.getLogger(UdpDispatcher.class);
+    private LongAdder counter = new LongAdder();
     public UdpDispatcher() throws SocketException {
 
     }
@@ -25,6 +27,8 @@ public class UdpDispatcher {
         DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length,address, packet.getSourcePort());
         try {
             this.socket.send(datagramPacket);
+            counter.increment();
+            logger.info("[{}] Packets dispatched [localhost:{}]",counter.longValue(),packet.getSourcePort());
         }catch (IOException e){
             e.printStackTrace();
             throw e;
