@@ -28,14 +28,15 @@ public class UdpDispatcher {
 
 
     public void submit(Packet packet) throws IOException {
-        InetAddress address = InetAddress.getByName("localhost");
+        String ipAddress = packet.getDestinationAddress();
+        InetAddress address = InetAddress.getByName(ipAddress);
         byte[] buffer = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
         //logger.info("Sending Message to [{}]:[{}]:[{}]",address,packet.getSourcePort(),buffer);
         DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length,address, packet.getSourcePort());
         try {
             this.socket.send(datagramPacket);
             counter.increment();
-            logger.info("[{}] Packets dispatched [localhost:{}]",counter.longValue(),packet.getSourcePort());
+            logger.info("[{}] Packets dispatched [{}:{}]",counter.longValue(),ipAddress,packet.getSourcePort());
         }catch (IOException e){
             e.printStackTrace();
             throw e;

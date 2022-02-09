@@ -84,21 +84,23 @@ public class UdpDeviceListener implements DeviceListener {
         logger.info("[{}] UDP Listener Started!",this.port);
         listenerThread = Thread.currentThread();
         while (!stopped.get()){
-            if(Thread.currentThread().isInterrupted()){
-                logger.info("[{}] Shutting down UDP listener thread.",port);
-                break;
-            }
+
             byte[] buffer = new byte[65535];
 
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
             try {
+
                 udpSocket.receive(packet);
+                long start = System.currentTimeMillis();
                 if(isShutdownPacket(buffer)){
-                    break;
+                    if(Thread.currentThread().isInterrupted()){
+                        logger.info("[{}] Shutting down UDP listener thread.",port);
+                        break;
+                    }
                 }
                 handler.accept(buffer, InetAddress.getLocalHost().getHostAddress(), this.port);
                 counter.increment();
-                logger.info("[{}] Packets Received on [localhost:{}]",counter.longValue(),this.port);
+                logger.info("[{}]ms Packet#{} Received on [Port:{}]",System.currentTimeMillis()-start,counter.longValue(),this.port);
             } catch (IOException e) {
                 logger.error("[{}] error while receiving UDP Packet: {}",this.port,e.getMessage());
                 errors.increment();
