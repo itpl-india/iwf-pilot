@@ -1,8 +1,9 @@
 package io.itpl.apilab.data;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class ServiceInstance {
+public class ServiceInstance implements Serializable {
     private Date startedOn;
     private String protocol;
     private long received;
@@ -65,5 +66,18 @@ public class ServiceInstance {
 
     public void setError(long error) {
         this.error = error;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceInstance{" +
+                "startedOn=" + startedOn +
+                ", protocol='" + protocol + '\'' +
+                ", received=" + received +
+                ", scheduled=" + scheduled +
+                ", error=" + error +
+                ", inQueue=" + inQueue +
+                ", deviceDriver='" + deviceDriver + '\'' +
+                '}';
     }
 }
