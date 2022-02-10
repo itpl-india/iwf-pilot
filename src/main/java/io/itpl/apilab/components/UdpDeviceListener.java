@@ -29,6 +29,8 @@ public class UdpDeviceListener implements DeviceListener {
         this.driver = driver;
         this.port = driver.getPort();
         udpSocket = new DatagramSocket(this.port);
+        int bufferSize = udpSocket.getSendBufferSize();
+        logger.info("UDP socket created with buffer-size:{}",bufferSize);
         this.handler = handler;
     }
 

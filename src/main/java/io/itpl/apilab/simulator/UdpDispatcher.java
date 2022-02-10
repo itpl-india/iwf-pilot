@@ -7,10 +7,7 @@ import io.itpl.apilab.services.SudoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.*;
@@ -74,6 +71,13 @@ public class UdpDispatcher {
                 response.setStatus(500);
                 response.setMessage(e.getMessage());
             }
+            return response;
+        }
+        @GetMapping("/udp/simulate/{qty}/{loop}")
+        public ApiResponse simulate(@PathVariable("qty") int qty,@PathVariable("loop") int loop){
+            ApiResponse response = ApiResponse.init();
+            int duration = udpDispatcherService.submitLoad(qty,loop);
+            response.submit(Integer.valueOf(duration));
             return response;
         }
     }
