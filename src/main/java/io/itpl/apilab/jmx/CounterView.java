@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
-public class CounterView implements CounterViewMBean {
+public class CounterView implements CounterViewMXBean {
 
     @Override
     public String getName() {
@@ -36,6 +36,20 @@ public class CounterView implements CounterViewMBean {
             e.printStackTrace();
         }
         return -2;
+    }
+
+    @Override
+    public List<ServiceInstance> viewLiveInstances() {
+        try{
+            ApplicationContext context = ApiLabApplication.getContext();
+            ServiceInstanceManager manager = context.getBean(ServiceInstanceManager.class);
+            List<ServiceInstance> list = manager.viewAll();
+           return list;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private String name;
